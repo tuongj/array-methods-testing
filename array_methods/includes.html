@@ -48,22 +48,19 @@ tests({
         eq(testResult, true);
     },
     "4. It should return false if no value is found.": function() {
-        let testResult = includes([1,'a',NaN], 2);
-
-        eq(testResult, false);
-
-
-
-        let includesReturnedValue = includes([1, 2, 3], 'string');
-        let includesReturnedValue1 = includes([3, 2, 3, 1, 3, 5, 6], 4);
-        let includesReturnedValue2 = includes(['1', '2', '3', '4', '5'], 4);
-        let includesReturnedValue3 = includes(['1', '2', '3', '4', '5', false, false, 1, 2, 3, 4, true], true);
-        let includesReturnedValue4 = includes([1, 2, 3, 4], '1');
-        eq(includesReturnedValue, false);
-        eq(includesReturnedValue1, false);
-        eq(includesReturnedValue2, false);
-        eq(includesReturnedValue3, true);
-        eq(includesReturnedValue4, false);
+        let testResult1 = includes([1,'a',NaN], 2);
+        let testResult2 = includes([1, 2, 3], 'string');
+        let testResult3 = includes([3, 2, 3, 1, 3, 5, 6], 4);
+        let testResult4 = includes(['1', '2', '3', '4', '5'], 4);
+        let testResult5 = includes([false, , undefined], true);
+        let testResult6 = includes([1, 2, 3, 4], '1');
+        
+        eq(testResult1, false);
+        eq(testResult2, false);
+        eq(testResult3, false);
+        eq(testResult4, false);
+        eq(testResult5, false);
+        eq(testResult6, false);
     },
     "5. It should return true for all values of zeros (that is, -0 is considered be equal to both 0 and +0).": function() {
         let testResult1 = includes([0], -0);
