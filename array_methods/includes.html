@@ -1,0 +1,122 @@
+<script src="../tinytest.js"></script>
+<script>
+'use strict'
+
+/*
+MDN Web Docs: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes
+
+A Boolean which is true if the value valueToFind is found within the array (or the part of the array indicated by the index fromIndex, if specified). Values of zero are all considered to be equal regardless of sign (that is, -0 is considered to be equal to both 0 and +0), but false is not considered to be the same as 0.
+*/
+
+function includes(array, valueToFind, fromIndex){
+    let startIndex = 0;
+
+    if (fromIndex >= 0) {
+        startIndex = fromIndex;
+    } else if(fromIndex < 0){
+        startIndex = array.length + fromIndex;
+    }
+
+    for (let i = startIndex; i < array.length; i++) {
+        if ((array[i] === valueToFind) || (Number.isNaN(array[i]) && Number.isNaN(valueToFind))) {
+            return true;
+        }
+
+    }
+
+    return false;
+
+}
+
+
+tests({
+
+    "1. It should return true if a string value to search for is found.": function() {
+        let testResult = includes(['a','b','c'], 'b');
+
+        eq(testResult, true);
+
+    },
+    "2. It should return true if a number value to search for is found.": function() {
+        let testResult = includes([1,2,3], 2);
+
+        eq(testResult, true);
+    },
+    "3. It should return true if a NaN value to search for is found.": function() {
+        let testResult = includes([1,'a',NaN], NaN);
+
+        eq(testResult, true);
+    },
+    "4. It should return false if no value is found.": function() {
+        let testResult1 = includes([1,'a',NaN], 2);
+        let testResult2 = includes([1, 2, 3], 'string');
+        let testResult3 = includes([3, 2, 3, 1, 3, 5, 6], 4);
+        let testResult4 = includes(['1', '2', '3', '4', '5'], 4);
+        let testResult5 = includes([false, , undefined], true);
+        let testResult6 = includes([1, 2, 3, 4], '1');
+        
+        eq(testResult1, false);
+        eq(testResult2, false);
+        eq(testResult3, false);
+        eq(testResult4, false);
+        eq(testResult5, false);
+        eq(testResult6, false);
+    },
+    "5. It should return true for all values of zeros (that is, -0 is considered be equal to both 0 and +0).": function() {
+        let testResult1 = includes([0], -0);
+        let testResult2 = includes([+0], -0);
+        let testResult3 = includes([-0], 0);
+        let testResult4 = includes([+0], 0);
+        let testResult5 = includes([0], +0);
+        let testResult6 = includes([-0], +0);
+
+        eq(testResult1, true);
+        eq(testResult2, true);
+        eq(testResult3, true);
+        eq(testResult4, true);
+        eq(testResult5, true);
+        eq(testResult6, true);
+    },
+    "6. It should return true if fromIndex is declared and matching value is found.": function() {
+        let testResult = includes([1,2,3,4], 4, 2);
+
+        eq(testResult, true);
+    },
+    "7. It should return false if fromIndex is greater than or equal to length of the array.": function() {
+        let testResult1 = includes([1,2,3], 3, 100);
+        let testResult2 = includes([1,2,3], 3, 3);
+
+        eq(testResult1, false);
+        eq(testResult2, false);
+    },
+    "8. Entire array should be searched if fromIndex is negative and the computed index (array.length + fromIndex) is less or equal than -1 * array.length.": function() {
+        let testResult1 = includes(['a','b','c'], 'a', -100);
+        let testResult2 = includes(['a','b','c'], 'b', -100);
+        let testResult3 = includes(['a','b','c'], 'c', -100);
+
+        eq(testResult1, true);
+        eq(testResult2, true);
+        eq(testResult3, true);
+    },
+    "9. When fromIndex is negative, the computed index is calculated to be used as a position in the array at which to begin searching for valueToFind.": function() {
+        let testResult1 = includes(['a','b','c'], 'a', -2);
+        let testResult2 = includes(['a','b','c'], 'c', -2);
+
+        eq(testResult1, false);
+        eq(testResult2, true);
+    },
+    "10. It should return true if elements that are unassigned are found.": function() {
+        let testResult = includes([1,2,3,,,], undefined);
+        
+        eq(testResult, true);
+    }
+
+
+
+    
+});
+
+
+
+</script>
+

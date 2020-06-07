@@ -1,0 +1,130 @@
+<script src="../tinytest.js"></script>
+<script>
+'use strict'
+
+/*
+MDN Web Docs: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice
+
+slice does not alter the original array. It returns a shallow copy of elements from the original array. Elements of the original array are copied into the returned array as follows:
+
+For object references (and not the actual object), slice copies object references into the new array. Both the original and new array refer to the same object. If a referenced object changes, the changes are visible to both the new and original arrays.
+For strings, numbers and booleans (not String, Number and Boolean objects), slice copies the values into the new array. Changes to the string, number or boolean in one array do not affect the other array.
+If a new element is added to either array, the other array is not affected.
+
+*/
+
+
+function slice(array, begin, end) {
+    
+    let result = [];
+    let startIndex = 0;
+    let endIndex = array.length;
+
+    if (begin > 0 && begin < array.length) {
+        startIndex = begin;
+    } else if (begin < 0) {
+        startIndex = array.length + begin;
+    } else if (begin >= array.length) {
+        return result;
+    } 
+
+    if (end > 0 && end < array.length){
+        endIndex = end;
+    } else if (end < 0) {
+        endIndex = array.length + end;
+    } else if (end >= array.length) {
+        endIndex = array.length;
+    }
+
+    for (let i = startIndex; i < endIndex; i++) {
+        result.push(array[i]);
+    }
+
+    return result;
+}
+
+tests({
+
+    "1. It should pass in all elements in the array if no parameters are provided.": function() {
+        let testArray = ['ant', 'bison', 'camel', 'duck', 'elephant'];
+        let testResult = slice(testArray);
+        
+        eq(testResult.length, 5);
+    },
+    "2. It should not alter the original array and returns a shallow copy of elements from the original array.": function() {
+        let testArray = ['ant', 'bison', 'camel', 'duck', 'elephant'];
+        let testResult = slice(testArray, 2);
+        
+        eq(testResult.length, 3);
+        eq(testArray.length, 5);
+    },
+    "3. If begin parameter is invoked as a negative number, it should offset from the end of sequence.": function() {
+        let testArray = ['ant', 'bison', 'camel', 'duck', 'elephant'];
+        let testResult = slice(testArray, -2);
+
+        eq(testResult.length, 2)
+        eq(testResult[0], "duck");
+        eq(testResult[1], "elephant");
+    },
+    "4. If begin parameter is undefined, the index begins from 0.": function() {
+        let testArray = ['ant', 'bison', 'camel', 'duck', 'elephant'];
+        let testResult = slice(testArray, undefined);
+        
+        eq(testResult.length, 5);
+    },
+    "5. If begin parameter is greater than the length of the sequence, an empty array is returned.": function() {
+        let testArray = ['ant', 'bison', 'camel', 'duck', 'elephant'];
+        let testResult = slice(testArray, 10);
+
+        eq(testResult.length, 0);
+    },
+    "6. If end parameter is invoked as a negative number, it should offset from the end of the sequence.": function() {
+        let testArray = ['ant', 'bison', 'camel', 'duck', 'elephant'];
+        let testResult = slice(testArray, 2, -1);
+        
+        eq(testResult.length, 2);
+        eq(testResult[0], 'camel');
+        eq(testResult[1], 'duck');
+    },
+    "7. If end parameter is emitted, it should extract through the entire sequence.": function() {
+        let testArray = ['ant', 'bison', 'camel', 'duck', 'elephant'];
+        let testResult = slice(testArray, 0);
+
+        eq(testResult.length, 5);
+    },
+    "8. If end parameter is greater than the length of the sequence, it should extract through to the end of the sequence.": function() {
+        let testArray = ['ant', 'bison', 'camel', 'duck', 'elephant'];
+        let testResult = slice(testArray, 0, 10);
+
+        eq(testResult.length, 5);
+    },
+    "9. It should return a new array containing the extracted number elements": function() {
+        let testArray = [1,2,3,4,5];
+        let testResult = slice(testArray,2);
+        
+        eq(testResult.length, 3);
+        eq(testResult[0], 3);
+        eq(testResult[1], 4);
+        eq(testResult[2], 5);
+    },
+    "10. It should return a new array containing the extracted boolean elements": function() {
+        let testArray = [true, false];
+        let testResult = slice(testArray,1);
+        
+        eq(testResult.length, 1);
+        eq(testResult[0], false);
+    },
+    "11. It should return a new array containing the extracted string elements": function() {
+        let testArray = ['ant', 'bison', 'camel', 'duck', 'elephant'];
+        let testResult = slice(testArray,2);
+        
+        eq(testResult.length, 3);
+        eq(testResult[0], 'camel');
+        eq(testResult[1], 'duck');
+        eq(testResult[2], 'elephant');
+    }
+
+
+});
+
+</script>

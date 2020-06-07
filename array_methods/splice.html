@@ -1,0 +1,296 @@
+<script src="../tinytest.js"></script>
+<script>
+'use strict'
+
+/*
+MDN Web Docs: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice
+
+If the specified number of elements to insert differs from the number of elements being removed, the array's length will be different at the end of the call.
+*/
+
+function splice(array, start, deleteCount, ...items) {
+        let removedArray = []; // Elements that are removed
+        let copyArray = JSON.parse(JSON.stringify(array)); // Deep copy of the original array
+        let arrayLength = array.length;
+        
+        // Remove all elements from the original array
+        array.length = 0;
+
+        if (start < 0){
+            if (arrayLength + start < 0){ 
+                start = 0; 
+            } else{
+                start = arrayLength + start;
+            }
+        }
+
+        if ((typeof deleteCount === 'undefined' || deleteCount > (arrayLength - start)) && start < arrayLength) {
+            deleteCount = arrayLength;
+        }
+
+        if (start >= arrayLength){
+            start = arrayLength;
+            arrayLength += 1;
+        }
+        
+        for (let i = 0, x = 0, y = 0; i < arrayLength; i++){
+            // Insert elements in item parameter to the array
+            if (i === start){
+                while (x < items.length){
+                    array.push(items[x]);
+                    x++;
+                }
+            }
+            // Skip (remove) elements in the array
+            if (i >= start && y < deleteCount){
+                removedArray.push(copyArray[i]);
+                y++
+                continue;
+            // Insert elements while maintaining within the length of the original array
+            } else if (i < copyArray.length){
+                array.push(copyArray[i]);
+            }
+
+        }
+        
+        return removedArray;
+
+}
+
+    tests({
+        '1. It should return an array.': function () {
+            let testArray = [1, 2, 3, 4];
+            let testResult = splice(testArray);
+
+            eq(Array.isArray(testResult), true);
+        }, 
+        '2. If the start paramter is only declared, remove elements to the end of the array from the start index.': function () {
+            let testArray = [1, 2, 3, 4];
+            //debugger;
+            let testResult = splice(testArray, 2);
+
+            eq(testArray.length, 2);
+            eq(testArray[0], 1);
+            eq(testArray[1], 2);
+
+            eq(testResult.length, 2);
+            eq(testResult[0], 3);
+            eq(testResult[1], 4);
+        },
+        '3. If the start parameter is greater than the length of the array, no element will be deleted.': function () {
+            let testArray = [1, 2, 3, 4];
+            //debugger;
+            let testResult = splice(testArray, 6);
+
+            eq(testArray.length, 4);
+            eq(testArray[0], 1);
+            eq(testArray[1], 2);
+            eq(testArray[2], 3);
+            eq(testArray[3], 4);
+
+            eq(testResult.length, 0);
+        }, 
+        '4. Method should behave as an adding function if the start parameter is greater than or equal to the length of the array.': function(){
+            let testArray1 = [1, 2, 3, 4];
+            let testResult1 = splice(testArray1, 6, 0, 'item1', 'item2');
+            eq(testArray1.length, 6);
+            eq(testArray1[0], 1);
+            eq(testArray1[1], 2);
+            eq(testArray1[2], 3);
+            eq(testArray1[3], 4);
+            eq(testArray1[4], 'item1');
+            eq(testArray1[5], 'item2');
+
+            eq(testResult1.length, 0);
+
+            let testArray2 = [1, 2, 3, 4];
+            let testResult2 = splice(testArray2, 4, 0, 'item1', 'item2');
+            eq(testArray2.length, 6);
+            eq(testArray2[0], 1);
+            eq(testArray2[1], 2);
+            eq(testArray2[2], 3);
+            eq(testArray2[3], 4);
+            eq(testArray2[4], 'item1');
+            eq(testArray2[5], 'item2');
+
+            eq(testResult2.length, 0);
+        },
+        '5. If the start parameter is negative, it will begin that many elements from the end of the array.': function () {
+            let testArray = [1, 2, 3, 4];
+            let testResult = splice(testArray, -2);
+            
+            eq(testArray.length, 2);
+            eq(testArray[0], 1);
+            eq(testArray[1], 2);
+            
+            eq(testResult.length, 2);
+            eq(testResult[0], 3);
+            eq(testResult[1], 4);
+        }, 
+        '6. If the start parameter is negative and array.length + start is less than 0, start will begin from index 0.': function (){
+            let testArray = [1, 2, 3, 4];            
+            let testResult = splice(testArray, -5);
+            
+            eq(testArray.length, 0);
+
+            eq(testResult.length, 4);
+            eq(testResult[0], 1);
+            eq(testResult[1], 2);
+            eq(testResult[2], 3);
+            eq(testResult[3], 4);
+            
+            
+        },
+        '7. If the deleteCount is greater than 0, it should remove the number of elements in the array from start to deleteCount.': function () {
+            let testArray1 = [1, 2, 3, 4];
+            let testResult1 = splice(testArray1, 1, 2);
+            eq(testArray1.length, 2);
+            eq(testArray1[0], 1);
+            eq(testArray1[1], 4);
+
+            eq(testResult1.length, 2);
+            eq(testResult1[0], 2);
+            eq(testResult1[1], 3);
+
+
+            let testArray2 = [1, 2, 3, 4];
+            let testResult2 = splice(testArray2, 1, 3);
+            eq(testArray2.length, 1);
+            eq(testArray2[0], 1);
+
+            eq(testResult2.length, 3);
+            eq(testResult2[0], 2);
+            eq(testResult2[1], 3);
+            eq(testResult2[2], 4);
+        },
+        '8. If deleteCount is omitted, all the elements from start to the end of the array will be deleted.': function () {
+            let testArray1 = [1, 2, 3, 4];
+            let testResult1 = splice(testArray1, 1);
+            eq(testArray1.length, 1);
+            eq(testArray1[0], 1);
+
+            eq(testResult1[0], 2);
+            eq(testResult1[1], 3);
+            eq(testResult1[2], 4);
+
+
+            let testArray2 = [1, 2, 3, 4];
+            let testResult2 = splice(testArray2, 3);
+            eq(testArray2.length, 3);
+            eq(testArray2[0], 1);
+            eq(testArray2[1], 2);
+            eq(testArray2[2], 3);
+            
+            eq(testResult2[0], 4);
+        },
+        '9. If deleteCount value is equal to or larger than the number of elements left in the array (array.length - start), then all the elements from start to the end of the array should be deleted.': function () {
+            let testArray1 = [1, 2, 3, 4];
+            let testResult1 = splice(testArray1, 0, 4);
+            eq(testArray1.length, 0);
+            
+            eq(testResult1.length, 4);
+            eq(testResult1[0], 1);
+            eq(testResult1[1], 2);
+            eq(testResult1[2], 3);
+            eq(testResult1[3], 4);
+
+
+            let testArray2 = [1, 2, 3, 4];
+            let testResult2 = splice(testArray2, 0, 10);
+            eq(testArray2.length, 0);
+
+            eq(testResult2.length, 4);
+            eq(testResult2[0], 1);
+            eq(testResult2[1], 2);
+            eq(testResult2[2], 3);
+            eq(testResult2[3], 4);
+        },
+        '10. If deleteCount is 0 or negative, it should not remove any elements.': function () {
+            let testArray1 = [1, 2, 3, 4];
+            let testResult1 = splice(testArray1, 0, 0);
+            eq(testArray1.length, 4);
+            eq(testArray1[0], 1);
+            eq(testArray1[1], 2);
+            eq(testArray1[2], 3);
+            eq(testArray1[3], 4);
+
+            eq(testResult1.length, 0);
+
+
+            let testArray2 = [1, 2, 3, 4];
+            let testResult2 = splice(testArray2, 0, -2);
+            eq(testArray2.length, 4);
+            eq(testArray2[0], 1);
+            eq(testArray2[1], 2);
+            eq(testArray2[2], 3);
+            eq(testArray2[3], 4);
+
+            eq(testResult2.length, 0);
+        },
+        '11. If an element in item parameter is declared, it should add elements to the array, beginning from start.': function () {
+            let testArray1 = [1, 2, 3, 4];
+            let testResult1 = splice(testArray1, 1, 0, 'item1', 'item2');
+            eq(testArray1.length, 6);
+            eq(testArray1[0], 1);
+            eq(testArray1[1], 'item1');
+            eq(testArray1[2], 'item2');
+            eq(testArray1[3], 2);
+            eq(testArray1[4], 3);
+            eq(testArray1[5], 4);
+
+            eq(testResult1.length, 0);
+
+
+            let testArray2 = [1, 2, 3, 4];
+            let testResult2 = splice(testArray2, 0, 2, 'item1', 'item2');
+            eq(testArray2.length, 4);
+            eq(testArray2[0], 'item1');
+            eq(testArray2[1], 'item2');
+            eq(testArray2[2], 3);
+            eq(testArray2[3], 4);
+            
+            eq(testResult2.length, 2);
+            eq(testResult2[0], 1);
+            eq(testResult2[1], 2);
+        },
+        '12. If the item parameter is not declared, it should only remove elements from the array.': function () {
+            let testArray1 = [1, 2, 3, 4];
+            let testResult1 = splice(testArray1, 0, 2);
+            eq(testArray1.length, 2);
+            eq(testArray1[0], 3);
+            eq(testArray1[1], 4);
+
+            eq(testResult1.length, 2);
+            eq(testResult1[0], 1);
+            eq(testResult1[1], 2);
+
+
+            let testArray2 = [1, 2, 3, 4];
+            let testResult2 = splice(testArray2, 2, 3);
+            eq(testArray2.length, 2);
+            eq(testArray2[0], 1);
+            eq(testArray2[1], 2);
+
+            eq(testResult2.length, 2);
+            eq(testResult2[0], 3);
+            eq(testResult2[1], 4);
+        },
+        '13. If no elements are removed, it should return an empty array.': function () {
+            let testArray = [1, 2, 3, 4];
+            let testResult = splice(testArray, 0);
+
+            eq(testArray.length, 0);
+            
+            eq(testResult.length, 4);
+            eq(testResult[0], 1);
+            eq(testResult[1], 2);
+            eq(testResult[2], 3);
+            eq(testResult[3], 4);
+
+
+        }
+
+    });
+
+
+</script>
