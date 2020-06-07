@@ -1,0 +1,146 @@
+<script src="../tinytest.js"></script>
+<script>
+'use strict'
+
+/*
+The some() method tests whether at least one element in the array passes the test implemented by the provided function. It returns a Boolean value. 
+Note: This method returns false for any condition put on an empty array.
+
+The some() method executes the callback function once for each element present in the array until it finds the one where callback returns a truthy value (a value that becomes true when converted to a Boolean). If such an element is found, some() immediately returns true. Otherwise, some() returns false. callback is invoked only for indexes of the array with assigned values. It is not invoked for indexes which have been deleted or which have never been assigned values.
+
+callback is invoked with three arguments: the value of the element, the index of the element, and the Array object being traversed.
+
+If a thisArg parameter is provided to some(), it will be used as the callback's this value. Otherwise, the value undefined will be used as its this value. The this value ultimately observable by callback is determined according to the usual rules for determining the this seen by a function.
+
+some() does not mutate the array on which it is called.
+
+The range of elements processed by some() is set before the first invocation of callback. Elements appended to the array after the call to some() begins will not be visited by callback. If an existing, unvisited element of the array is changed by callback, its value passed to the visiting callback will be the value at the time that some() visits that element's index. Elements that are deleted are not visited.
+*/
+
+
+function some(array, callback, thisArg){
+    let someCallback = callback;
+    let arrayLength = array.length;
+
+    if (thisArg) {
+        someCallback = callback.bind(thisArg);
+    }
+    
+    for (let i = 0; i < arrayLength; i++) {
+        if (i in array) {
+            if (someCallback(array[i], i, array)) { //element, index, array
+                return true;
+            }
+        }
+    }
+
+    return false;
+
+
+}
+
+tests({
+    '1. It should pass in the ith element as the first argument to the callback.': function() {
+        some([1], function(element) {
+            eq(element, 1);
+        })
+    },
+    '2. It should pass in the ith index as the second argument to the callback.': function() {
+        some([1], function(element, index) {
+            eq(index, 0);
+        })
+    },
+    '3. It should pass in the array as the third argument to the callback.': function() {
+        let testArray = [1,2,3];
+        some(testArray, function(element, index, originalArray){
+            eq(originalArray, testArray);
+        })
+    },
+    '4. It should pass in the configurable this object.': function() {
+        some([1], function() {
+            eq(this.myObject, 'I should be seen');
+        }, {myObject: 'I should be seen'})
+    },
+    '5. It should pass in undefined if thisArg parameter is not invokved.': function() {
+        some([1], function() {
+            eq(this, undefined);
+        })
+    },
+    '6. It should not mutate the array on which it is called.': function() {
+        let testArray = [1,2,3];
+        some(testArray, function(element, index, originalArray) {})
+        eq(testArray[0], 1);
+        eq(testArray[1], 2);
+        eq(testArray[2], 3);
+
+    },
+    '7. It should pass in a true Boolean value when an element is found.': function() {
+        let testValue = some([1,2,3], function(element, index, originalArray){
+            return element === 2;
+        })
+
+        eq(testValue, true);
+    },
+    '8. It should pass in a false Boolean value when no element is found.': function() {
+        let testValue = some([1,2,3], function(element, index, originalArray){
+            return element === 4;
+        })
+
+        eq(testValue, false);
+    },
+    '9. It should invoke elements of the array only with assigned values.': function() {
+        let testArray = [1,,,,5];
+        let someCounter = 0;
+        some(testArray, function(element, index, originalArray){
+            someCounter++;
+        })
+        eq(someCounter, 2);
+    },
+    '10. It should not invoke for indexes which have been deleted.': function() {
+        let testArray = [1,2,3,4];
+        let someCounter = 0;
+        let testValue = some(testArray, function(element, index, originalArray){
+            someCounter++;
+            if (index === 0) {
+                testArray.splice(2,1);
+            }
+            return element !== 3;
+        })
+        eq(testArray.length, 3);
+        eq(testValue, true);
+    },
+    '11. It should invoke range of elements set before first invocation of callback, ignoring appended elements.': function() {
+        let testArray = [1,2,3];
+        let someCounter = 0;
+        some(testArray, function(element, index, originalArray){
+            someCounter++;
+            if (index === 0) {
+                testArray.push(4);
+            }
+        })
+        eq(someCounter, 3);
+        eq(testArray.length, 4);
+    },
+    '12. It should pass in the ith element in which an existing unvisited element is changed': function() {
+        let testArray = [1,2,3];
+        let someCounter = 0;
+        let testValue = some(testArray, function(element, index, originalArray){
+            someCounter++;
+            if (index === 0) {
+                testArray[2] = 4;
+            }
+            return element === 4;
+        })
+        eq(someCounter, 3);
+        eq(testArray.length, 3);
+        eq(testArray[2], 4);
+        eq(testValue, true);
+    }
+
+
+
+});
+
+
+</script>
+

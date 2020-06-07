@@ -1,0 +1,179 @@
+<script src="../tinytest.js"></script>
+<script>
+'use strict'
+
+/*
+reduceRight executes the callback function once for each element present in the array, excluding holes in the array, receiving four arguments: the initial value (or value from the previous callback call), the value of the current element, the current index, and the array over which iteration is occurring.
+
+The call to the reduceRight callback would look something like this:
+
+array.reduceRight(function(accumulator, currentValue, index, array) {
+  // ...
+});
+
+The first time the function is called, the accumulator and currentValue can be one of two values. If an initialValue was provided in the call to reduceRight, then accumulator will be equal to initialValue and currentValue will be equal to the last value in the array. If no initialValue was provided, then accumulator will be equal to the last value in the array and currentValue will be equal to the second-to-last value.
+
+If the array is empty and no initialValue was provided, TypeError would be thrown. If the array has only one element (regardless of position) and no initialValue was provided, or if initialValue is provided but the array is empty, the solo value would be returned without calling callback.
+
+Some example run-throughs of the function would look like this:
+
+[0, 1, 2, 3, 4].reduceRight(function(accumulator, currentValue, index, array) {
+  return accumulator + currentValue;
+});
+The callback would be invoked four times, with the arguments and return values in each call being as follows:
+
+callback	accumulator	currentValue	index	array	            return value
+first call	4	        3	            3	    [0, 1, 2, 3, 4]	    7
+second call	7	        2	            2	    [0, 1, 2, 3, 4]	    9
+third call	9	        1	            1	    [0, 1, 2, 3, 4]	    10
+fourth call	10	        0	            0	    [0, 1, 2, 3, 4]	    10
+The value returned by reduceRight would be that of the last callback invocation (10).
+
+And if you were to provide an initialValue, the result would look like this:
+
+[0, 1, 2, 3, 4].reduceRight(function(accumulator, currentValue, index, array) {
+  return accumulator + currentValue;
+}, 10);
+
+callback	accumulator	currentValue	index	array	            return value
+first call	10	        4	            4	    [0, 1, 2, 3, 4]	    14
+second call	14	        3	            3	    [0, 1, 2, 3, 4]	    17
+third call	17	        2	            2	    [0, 1, 2, 3, 4]	    19
+fourth call	19	        1	            1	    [0, 1, 2, 3, 4]	    20
+fifth call	20	        0	            0	    [0, 1, 2, 3, 4]	    20
+The value returned by reduceRight this time would be, of course, 20.
+*/
+
+function reduceRight(array, callback, initialValue){
+
+    if (Array.isArray(array) && array.length === 0 && typeof initialValue === "undefined") {
+        return TypeError("Reduce of empty array with no initial value");
+    } else if (Array.isArray(array) && array.length === 1) {
+        return array[0];
+    }
+
+    let accumulator = array[array.length - 1]; //last value
+    let currentValueIndex = array.length - 2; //second-to-last value
+    if (initialValue) {
+        accumulator = initialValue; //replace with initialValue
+        currentValueIndex = array.length - 1; //replace with last value
+    }
+
+    for (let i = array.length - 1; i >= 0; i--) {
+        if (i in array) {
+            accumulator = callback(accumulator, array[currentValueIndex], i, array) //accumulator, currentValue, index, array
+        }
+        if (currentValueIndex > 0 ) {
+            currentValueIndex--; //decrement index
+        }
+    }
+    return accumulator;
+
+}
+
+tests({
+    '1. It should pass in the value previously returned as the first argument to the callback.': function() {
+        let testArray = [0,1,2,3,4];
+        let expectedAccumulator = [4,7,9,10,10];
+        let index = 0;
+            
+        reduceRight(testArray, function(accumulator, currentValue) {   
+            
+            eq(accumulator, expectedAccumulator[index]);
+            index++;
+            return accumulator + currentValue;
+            
+        })
+    },
+    '2. It should pass in the current element being processed as the second argument to the callback': function() {
+        let testArray = [0,1,2,3,4];
+        let expectedCurrentValue = [3,2,1,0];
+        let index = 0;
+            
+        reduceRight(testArray, function(accumulator, currentValue) {   
+            
+            eq(currentValue, expectedCurrentValue[index]);
+            if ( index < expectedCurrentValue.length - 1 ){
+                index++;
+            }
+           
+        })
+    },
+    '3. It should execute the callback function once for each element present in the array, excluding elements that are unassigned.': function() {
+        let testArray = [0,,,3,4];
+        let counter = 0;
+        reduceRight(testArray, function(accumulator, currentValue){
+            counter++;
+        })
+        eq(testArray.length, 5);
+        eq(counter, 3);
+    },
+    '4. It should pass in the ith element being procesed in the array as the third argument to the callback.': function() {
+        reduceRight([1], function(accumulator, currentValue, index) {
+            eq(index, 0);
+        })
+    },
+    '5. It should pass in the original array as the forth argument to the callback.': function() {
+        let testArray = [0,1,2,3];
+        reduceRight(testArray, function(accumulator, currentValue, index, originalAray){
+          eq(originalAray, testArray);
+        })
+    },
+    '6. When the initialValue is provided in the call, the accumulator will be equal to initialValue and the currentValue will be equal to the last value in the array.': function() {
+        reduceRight([1,2], function(accumulator, currentValue, index, originalArray) {
+            if (index === (originalArray.length - 1)) {
+                eq(accumulator, 5);
+                eq(currentValue, 2);
+            }
+            
+        }, 5)
+    },
+    '7. When no initialValue is provided in the call, the accumulator will be equal to the last value in the array and currentValue will be equal to the second-to-last value.': function() {
+        reduceRight([1,2], function(accumulator, currentValue, index, originalArray) {
+            if (index === (originalArray.length - 1)) {
+                eq(accumulator, 2);
+                eq(currentValue, 1);
+            }
+        })
+    },
+    '8. It should throw a TypeError when the array is empty and no initialValue was provided.': function() {
+        let error = reduceRight([], function(accumulator, currentValue, index, originalAray) {
+        })
+        eq(error, "TypeError: Reduce of empty array with no initial value");
+
+    },
+    '9. It should pass the solo value when the array has only one element and no initialValue was provided': function () {
+        reduceRight([1], function(accumulator, currentValue, index, originalAray) {
+            eq(accumulator, 1);
+        })
+    },
+    '10. It should pass the solo value when the initialValue is provided but the array is empty.': function () {
+        reduceRight([], function(accumulator, currentValue, index, originalAray) {
+            eq(accumulator, 2);
+        }, 2)        
+    },
+    '11. The value returned by reduceRight would be that of the last callback invocation.': function () {
+        let testArray = [0,1,2,3,4];
+        let testValue = reduceRight(testArray, function(accumulator, currentValue, index, originalAray) {   
+            return accumulator + currentValue;
+        })
+
+        eq(testValue, 10);
+    },
+    '12. When the initialValue is provided, the value returned by reduceRight would be that of the last callback invocation': function () {
+        let testArray = [0,1,2,3,4];
+        let testValue = reduceRight(testArray, function(accumulator, currentValue, index, originalAray) {   
+            return accumulator + currentValue;
+        }, 10)
+
+        eq(testValue, 20);
+    }
+
+
+    
+});
+
+
+
+</script>
+

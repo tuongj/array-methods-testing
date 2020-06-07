@@ -1,0 +1,52 @@
+<script src="../tinytest.js"></script>
+<script>
+'use strict'
+
+/*
+MDN Web Docs: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/unshift
+
+The unshift method inserts the given values to the beginning of an array-like object.
+
+unshift is intentionally generic. This method can be called or applied to objects resembling arrays. Objects which do not contain a length property—reflecting the last in a series of consecutive, zero-based numerical properties—may not behave in any meaningful manner.
+
+Please note that, if multiple elements are passed as parameters, they're inserted in chunk at the beginning of the object, in the exact same order they were passed as parameters. Hence, calling unshift with n arguments once, or calling it n times with 1 argument (with a loop, for example), don't yield the same results.
+*/
+
+function unshift(array, ...elementN){
+   
+    for (let i = elementN.length-1; i >= 0; i--) {
+        array.splice(0, 0, elementN[i]);
+    }
+
+    return array.length;
+
+
+}
+
+tests({
+
+    "It should return the length of the array.": function() {
+        let arrayTest = [4, 5, 6];
+        let testResult = unshift(arrayTest, 1,2,3);
+
+        eq(testResult, 6);
+    },
+    "It should insert the given value to the beginning of an array.": function() {
+        let arrayTest = [2];
+        let testResult = unshift(arrayTest, 1);
+
+        eq(arrayTest[0], 1);
+    },
+    "If multple elements are passed as parameters, it should return the array in the exact same order as they were passed as parameters.": function() {
+        let arrayTest = [4, 5, 6];
+        let testResult = unshift(arrayTest, 1,2,3);
+
+        eq(arrayTest[0], 1);
+        eq(arrayTest[1], 2);
+        eq(arrayTest[2], 3);
+
+    }
+    
+}) 
+
+</script>
